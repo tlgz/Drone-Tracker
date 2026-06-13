@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtuaaliympäristöt
+.venv/
+venv/
+env/
+
+# Videotiedostot (näitä ei kannata viedä GitHubiin koska ne ovat isoja)
+*.mp4
+*.avi
+*.mov
+
+# Koneoppimisen mallit (painotiedostot ovat valtavia)
+*.pth
+*.pt
+siamfc-pytorch/pretrained/
+
+# Käyttöjärjestelmän tiedostot
+.DS_Store
+Thumbs.db
