@@ -2,6 +2,7 @@ import cv2
 import sys
 import os
 import numpy as np
+import time
 
 # Add the cloned siamfc-pytorch repository to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'siamfc-pytorch'))
@@ -90,15 +91,6 @@ def main():
     # Create the SiamFC tracker using the PyTorch implementation
     tracker = TrackerSiamFC(net_path=net_path)
     
-    import torch
-    # Workaround for RTX 50-series GPUs (sm_120) which are not yet fully supported by PyTorch stable wheels
-    if tracker.cuda and torch.cuda.get_device_capability()[0] >= 12:
-        print("WARNING: RTX 50-series GPU detected. PyTorch stable lacks compiled kernels for it.")
-        print("Falling back to CPU for now. (Tracking will still be fast due to frame resizing!)")
-        tracker.cuda = False
-        tracker.device = torch.device('cpu')
-        tracker.net = tracker.net.to('cpu')
-        
     print(f"Tracking device initialized: {tracker.device}")
     if not tracker.cuda:
         print("Note: PyTorch is running on CPU.")
@@ -109,6 +101,8 @@ def main():
 
     # 4. Create a while loop to read the video frame by frame and update tracker
     while True:
+        timer_start = time.time()
+        
         ret, frame = cap.read()
         if not ret:
             print("Reached the end of the video.")
@@ -120,6 +114,9 @@ def main():
         # Update the tracker's position for the current frame
         # TrackerSiamFC returns a bounding box as an array: [x, y, w, h]
         box = tracker.update(frame)
+        
+        # Calculate FPS
+        fps = 1.0 / (time.time() - timer_start)
 
         # 5. Handle tracking success and failure
         # The standard SiamFC implementation does not return a confidence score natively, 
@@ -132,7 +129,10 @@ def main():
         else:
             # Tracking failed: the target is lost (box invalid)
             # Display "Target Lost" in red text on the screen
-            cv2.putText(frame, "Target Lost", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+            cv2.putText(frame, "Target Lost", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+
+        # Display FPS on frame
+        cv2.putText(frame, f"FPS: {int(fps)}", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 2)
 
         # 6. Display the video in real-time in a window
         cv2.imshow("Tracking Demo", frame)
