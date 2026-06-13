@@ -39,5 +39,5 @@ After pressing `S`, the video will pause in selection mode.
 
 **3. Tracking Phase:**
 - The script will automatically follow the object and draw a green bounding box around it.
-- If the object is lost or moves off-screen, a red "KOHDE KADONNUT" (Target Lost) warning will appear.
+- If the object is lost or moves off-screen, a red (Target Lost) warning will appear.
 - Press `Q` at any time to exit the viewer.
