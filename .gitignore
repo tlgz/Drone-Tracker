@@ -2,21 +2,22 @@
 __pycache__/
 *.py[cod]
 
-# Virtuaaliympäristöt
+# virtual environments
 .venv/
 venv/
 env/
 
-# Videotiedostot (näitä ei kannata viedä GitHubiin koska ne ovat isoja)
+# video files
+test-videos/
 *.mp4
 *.avi
 *.mov
 
-# Koneoppimisen mallit (painotiedostot ovat valtavia)
+# machine learning models
 *.pth
 *.pt
 siamfc-pytorch/pretrained/
 
-# Käyttöjärjestelmän tiedostot
+# operating system files
 .DS_Store
 Thumbs.db

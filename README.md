@@ -1,12 +1,4 @@
-# Drone Tracker Demo (SiamFC)
-
-A real-time visual object tracking script built in Python, using OpenCV and the **SiamFC** (Fully-Convolutional Siamese Networks) PyTorch model. It is specifically designed to track fast-moving objects (like drones) in video files.
-
-## Features
-- **Accurate Deep Learning Tracking:** Utilizes a PyTorch implementation of the SiamFC model for robust, state-of-the-art tracking capabilities.
-- **Smart Frame Navigation:** Allows you to pause the video and navigate frame-by-frame (forwards/backwards) to find the exact moment the object is clearly visible before initializing the tracker.
-- **Automatic Frame Resizing:** Dynamically scales down high-resolution videos (like 4K drone footage) to fit your screen properly while dramatically speeding up the tracking performance.
-- **Graceful Hardware Fallback:** Automatically detects newer, unsupported GPUs (like the RTX 50-series Blackwell architecture) and seamlessly falls back to CPU processing to prevent CUDA crashes.
+# Drone Tracker Demo
 
 ## Installation
 
