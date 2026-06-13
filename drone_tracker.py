@@ -131,8 +131,8 @@ def main():
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         else:
             # Tracking failed: the target is lost (box invalid)
-            # Display "KOHDE KADONNUT" in red text on the screen
-            cv2.putText(frame, "KOHDE KADONNUT", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+            # Display "Target Lost" in red text on the screen
+            cv2.putText(frame, "Target Lost", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
 
         # 6. Display the video in real-time in a window
         cv2.imshow("Tracking Demo", frame)
