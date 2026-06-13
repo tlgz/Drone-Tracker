@@ -145,28 +145,40 @@ def main():
         fps = 1.0 / (time.time() - timer_start)
 
         # 5. Handle tracking success and failure
+        display_frame = frame.copy()
+        
         # The standard SiamFC implementation does not return a confidence score natively, 
         # so it always returns a bounding box prediction. We assume success unless the 
         # box dimensions become invalid (e.g. tracking drifts off screen heavily).
         if box[2] > 0 and box[3] > 0 and not np.isnan(box).any():
             # Tracking was successful: draw a green rectangle around the object
             x, y, w, h = [int(v) for v in box]
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         else:
             # Tracking failed: the target is lost (box invalid)
             # Display "Target Lost" in red text on the screen
-            cv2.putText(frame, "Target Lost", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+            cv2.putText(display_frame, "Target Lost", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
 
         # Display FPS on frame
-        cv2.putText(frame, f"FPS: {int(fps)}", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 2)
+        cv2.putText(display_frame, f"FPS: {int(fps)} | S: Re-select target", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 2)
 
         # 6. Display the video in real-time in a window
-        cv2.imshow("Tracking Demo", frame)
+        cv2.imshow("Tracking Demo", display_frame)
 
-        # Wait for 1 millisecond between frames and check if 'q' was pressed to quit
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        # Wait for 1 millisecond between frames and check for key presses
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
             print("Program terminated by user.")
             break
+        elif key == ord('s'):
+            print("Pausing video to re-select a target...")
+            print("Please draw a bounding box around the NEW object you want to track.")
+            new_bbox = cv2.selectROI("Tracking Demo", frame, fromCenter=False, showCrosshair=True)
+            if new_bbox[2] > 0 and new_bbox[3] > 0:
+                print("New target selected! Re-initializing tracker...")
+                tracker.init(frame, new_bbox)
+            else:
+                print("Selection cancelled. Resuming with previous target.")
 
     # Release resources: close the video file and destroy OpenCV windows
     cap.release()
