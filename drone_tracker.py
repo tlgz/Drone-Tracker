@@ -3,6 +3,7 @@ import sys
 import os
 import numpy as np
 import time
+import argparse
 
 # Add the cloned siamfc-pytorch repository to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'siamfc-pytorch'))
@@ -23,27 +24,44 @@ def resize_frame(frame, max_width=1280, max_height=720):
     return frame
 
 def main():
+    parser = argparse.ArgumentParser(description="Drone Tracker using SiamFC")
+    parser.add_argument('--cam', action='store_true', help="Use webcam instead of video file")
+    args = parser.parse_args()
+
     # 1. Open the video using OpenCV
-    video_path = 'test.mp4'
+    if args.cam:
+        video_path = 0 # Default webcam index
+        print("Opening webcam...")
+    else:
+        video_path = 'test.mp4'
+        print(f"Opening video file '{video_path}'...")
+        
     cap = cv2.VideoCapture(video_path)
     
     if not cap.isOpened():
-        print(f"Error: Could not open video file '{video_path}'.")
-        print("Please make sure the video file exists in the same directory.")
+        print(f"Error: Could not open video source '{video_path}'.")
+        print("Please make sure the video file exists or the webcam is connected.")
         sys.exit()
 
     # 2. Let the user navigate frames to find the object
-    print("Navigation instructions:")
-    print("  'a' - Previous frame")
-    print("  'd' - Next frame")
-    print("  's' - Select object on the current frame")
-    print("  'q' - Quit program")
-    
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    if args.cam:
+        print("Live webcam feed active.")
+        print("  's' - Select object on the current frame")
+        print("  'q' - Quit program")
+    else:
+        print("Navigation instructions:")
+        print("  'a' - Previous frame")
+        print("  'd' - Next frame")
+        print("  's' - Select object on the current frame")
+        print("  'q' - Quit program")
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        
     frame_idx = 0
     
     while True:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        if not args.cam:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+            
         ret, frame = cap.read()
         if not ret:
             print("Error: Could not read the frame.")
@@ -53,17 +71,25 @@ def main():
         frame = resize_frame(frame)
             
         display_frame = frame.copy()
-        cv2.putText(display_frame, f"Frame: {frame_idx}/{total_frames} | A: Prev | D: Next | S: Select | Q: Quit", 
-                    (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        if args.cam:
+            cv2.putText(display_frame, "Live Feed | S: Select | Q: Quit", 
+                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        else:
+            cv2.putText(display_frame, f"Frame: {frame_idx}/{total_frames} | A: Prev | D: Next | S: Select | Q: Quit", 
+                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            
         cv2.imshow("Tracking Demo", display_frame)
         
-        key = cv2.waitKey(0) & 0xFF
+        # In live cam mode we use waitKey(1) to keep the feed moving.
+        # In video mode we use waitKey(0) to pause on the frame.
+        key = cv2.waitKey(1 if args.cam else 0) & 0xFF
+        
         if key == ord('q'):
             print("Program terminated by user.")
             sys.exit()
-        elif key == ord('a'):
+        elif key == ord('a') and not args.cam:
             frame_idx = max(0, frame_idx - 1)
-        elif key == ord('d'):
+        elif key == ord('d') and not args.cam:
             frame_idx = min(total_frames - 1, frame_idx + 1)
         elif key == ord('s') or key == 13 or key == 32:  # 's', ENTER or SPACE
             print("Please draw a bounding box around the object you want to track.")
